@@ -23,7 +23,7 @@ public:
 
     bool connect(QString ip, quint16 port);
     void disconnect();
-    void transmit(QList<QString> transData);
+    void transmit(QString transData);
     bool stateConnect();
 
 signals:
@@ -40,5 +40,6 @@ private:
     bool TCPConnect = false;
     QList<QByteArray> resMessBuff;
     QTcpSocket socket;
+    QByteArray dataRX;
 };
 #endif // TCP_H

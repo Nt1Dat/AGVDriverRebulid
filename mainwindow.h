@@ -35,6 +35,12 @@ private slots:
 
     void rxMessageThread(const QList<QByteArray> resMess);
 
+    void plotRespond();
+
+    void on_btClearpl_clicked();
+
+    void on_btTrap_clicked();
+
 private:
     Ui::MainWindow *ui;
 

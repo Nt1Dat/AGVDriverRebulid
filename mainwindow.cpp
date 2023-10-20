@@ -9,6 +9,10 @@ MainWindow::MainWindow(QWidget *parent)
 
      connect(&tcpThread, &TCP::response, this, &MainWindow::rxMessageThread);
 
+    time.start();
+
+     ui->txtIP->text().append("192.168.10.10");
+     ui->txtPort->text().append("8880");
 
 }
 
@@ -96,7 +100,7 @@ MainWindow::~MainWindow() { delete ui; }
 void MainWindow::on_btConnect_clicked() {
     if (ui->btConnect->text() == "Connect")
     {
-        if(!tcpThread.connect(ui->txtIP->text(),ui->txtPort->text().toInt()));
+        if(!tcpThread.connect(ui->txtIP->text(),ui->txtPort->text().toInt()))
         {
             ui->btConnect->setText("Disconnect");
             ui->btConnect->setStyleSheet("QPushButton {color: red;}");
@@ -112,27 +116,101 @@ void MainWindow::on_btConnect_clicked() {
             ui->btTrap->setDisabled(true);
             ui->btCmd->setDisabled(true);
          }
-
 }
 
 
 void MainWindow::rxMessageThread(const QList<QByteArray> resMess)
 {
+         ui->txtTime->append("Received data at time: " + QTime::currentTime().toString());
+
          quint64 currentTime = time.elapsed() + preTime;
          timeBuff.append(currentTime);
+         if(timeBuff.size() >= 400) timeBuff.removeFirst();
+
          preTime = currentTime;
          time.start();
 
          velVal1Buff.append(resMess[0].toFloat());
-         velVal2Buff.append(resMess[1].toFloat());
-         velRefBuff.append(resMess[2].toFloat());
-         posVal1Buff.append(resMess[3].toFloat());
-         posVal2Buff.append(resMess[4].toFloat());
-         posRefBuff.append(resMess[5].toFloat());
+         if(velVal1Buff.size() >= 400) velVal1Buff.removeFirst();
 
-         qDebug()<<resMess[0].toFloat()<<","<< resMess[1].toFloat();
+         velVal2Buff.append(resMess[1].toFloat());
+         if(velVal2Buff.size() >= 400) velVal2Buff.removeFirst();
+
+         velRefBuff.append(resMess[2].toFloat());
+         if(velRefBuff.size() >= 400) velRefBuff.removeFirst();
+
+         posVal1Buff.append(resMess[3].toFloat());
+         if(posVal1Buff.size() >= 400) posVal1Buff.removeFirst();
+
+         posVal2Buff.append(resMess[4].toFloat());
+         if(posVal2Buff.size() >= 400) posVal2Buff.removeFirst();
+
+         posRefBuff.append(resMess[5].toFloat());
+         if(posRefBuff.size() >= 400) posRefBuff.removeFirst();
+         plotRespond();
 
 }
 
+void MainWindow::plotRespond()
+{
+         ui->plVel->graph(0)->setData(timeBuff,velRefBuff);
+         ui->plVel->graph(1)->setData(timeBuff,velVal1Buff);
+         ui->plVel->graph(2)->setData(timeBuff,velVal2Buff);
+         ui->plVel->rescaleAxes();
+         ui->plVel->replot();
+         ui->plVel->update();
 
+         ui->plPos->graph(0)->setData(timeBuff,posRefBuff);
+         ui->plPos->graph(1)->setData(timeBuff,posVal1Buff);
+         ui->plPos->graph(2)->setData(timeBuff,posVal2Buff);
+         ui->plPos->rescaleAxes();
+         ui->plPos->replot();
+         ui->plPos->update();
+}
+
+
+
+void MainWindow::on_btClearpl_clicked()
+{
+         time.elapsed();
+         timeBuff.clear();
+         velVal1Buff.clear();
+         velVal2Buff.clear();
+         velRefBuff.clear();
+         posVal1Buff.clear();
+         posVal2Buff.clear();
+         posRefBuff.clear();
+         ui->plVel->clearGraphs();
+         ui->plPos->clearGraphs();
+}
+
+
+void MainWindow::on_btTrap_clicked()
+{
+         QString TX_Data;
+         char cR = '0', cL = '0';
+         if (ui->cbR->isChecked())
+         {
+            cR = '1';
+         }
+
+         if (ui->cbL->isChecked())
+         {
+            cL = '1';
+         }
+         QString pos = ui->txtPos->text();
+         QString vel = ui->txtVel->text();
+         QString acc = ui->txtAcc->text();
+
+         // Đảm bảo các chuỗi đều có ít nhất 4 ký tự bằng cách thêm 0 vào đầu nếu cần
+         while (pos.length() < 4) pos = "0" + pos;
+         while (vel.length() < 4) vel = "0" + vel;
+         while (acc.length() < 4) acc = "0" + acc;
+
+
+         TX_Data.append(pos + "," + vel + "," + acc + "," + cR + "," + cL);
+         tcpThread.transmit(TX_Data);
+
+
+}
 
