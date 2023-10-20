@@ -90,6 +90,7 @@ ArrData_t arrData1;
 
 uint8_t dir1, dir2;
 char statusOK[] = "OK\r\n";
+char result[100];
 
 int32_t dutyCycle_global_1 = 0,  dutyCycle_global_2 = 0;
 
@@ -142,8 +143,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  __HAL_TIM_SetCounter(&htim3, 32768);
-  __HAL_TIM_SetCounter(&htim4, 32768);
+
   while (1)
   {
     /* USER CODE END WHILE */
@@ -343,7 +343,19 @@ void MotorMovePos(PROFILE_t *tProfile, PID_CONTROL_t *tPIDControl1, PID_CONTROL_
   }
   MotorSetDuty(abs(g_nDutyCycle_1), MOTOR_1);
   MotorSetDuty(abs(g_nDutyCycle_2), MOTOR_2);
+  double real[6] = {tmotor1->velocity, tmotor2->velocity,  g_dCmdVel, tmotor1->position, tmotor2->position, dPosTemp};
+  strcpy(result, "=");
+  for (int i = 0; i < 6; i++) {
+        char buffer[20];
+        snprintf(buffer, sizeof(buffer), "%.2f", creal(real[i]));
+        strcat(result, buffer);
 
+        if (i < 5) {
+            strcat(result, ",");
+        }
+    }
+  strcat(result, "!");
+  HAL_UART_Transmit(&huart2, (uint8_t *)result, sizeof(result), 100);
   if (tProfile->nTime > tProfile->dMidStep3)
   {
     __HAL_TIM_SetCounter(&htim4, 0);

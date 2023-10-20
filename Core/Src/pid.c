@@ -1,9 +1,4 @@
-/*
- * pid.c
- *
- *  Created on: Feb 2, 2023
- *      Author: vienchau
- */
+
 
 #include "pid.h"
 #include "tim.h"

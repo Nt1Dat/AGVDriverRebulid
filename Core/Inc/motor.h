@@ -1,9 +1,3 @@
-/*
- * motor.h
- *
- *  Created on: Feb 2, 2023
- *      Author: vienchau
- */
 
 #ifndef INC_MOTOR_H_
 #define INC_MOTOR_H_
@@ -69,4 +63,5 @@ extern void Motor2Backward();
 extern void Motor2Backward();
 extern void ReadEncoder(Motor_t *tmotor, TIM_HandleTypeDef *htim);
 extern void MotorInit(void);
+extern void MotorSetDuty(uint16_t nDuty, uint8_t channel);
 #endif /* INC_MOTOR_H_ */

@@ -1,9 +1,3 @@
-/*
- * pid.h
- *
- *  Created on: Feb 2, 2023
- *      Author: vienchau
- */
 
 #ifndef INC_PID_H_
 #define INC_PID_H_
