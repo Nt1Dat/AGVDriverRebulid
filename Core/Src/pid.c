@@ -50,6 +50,7 @@ float PIDCompute(PID_CONTROL_t *PID_Ctrl, float dCmdValue, float dActValue, floa
     dI = PID_Ctrl->dKi * dTs / 2 * PID_Ctrl->dIntergral;
     dD = PID_Ctrl->dKd * (g_dPIDError - PID_Ctrl->dErrorTerm) / dTs;
     dPIDResult = dP + dI + dD;
+    PID_Ctrl->result = dPIDResult;
     PID_Ctrl->dErrorTerm = g_dPIDError;
 
     return dPIDResult;

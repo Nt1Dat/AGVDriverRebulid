@@ -16,30 +16,41 @@ void MotorSetRun()
 
 void Motor1Forward()
 {
-	 HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_SET);
+	 HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_RESET);
 }
 
 void Motor1Backward()
 {
-	 HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_RESET);
+	 HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_SET);
 }
 
 void Motor2Forward()
 {
-	 HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_SET);
+	 HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_RESET);
 }
 
 void Motor2Backward()
 {
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_SET);
 }
 
 void ReadEncoder(Motor_t *tmotor, TIM_HandleTypeDef *htim) {
+
   tmotor->counter = htim->Instance->CNT;
-  int16_t temp_data = tmotor->counter;
-  tmotor->velocity = (float)temp_data * (SECOND/ SAMPLING_TIME) * PTD; // DPS
-  tmotor->position += (float)temp_data * PTD; // Degree
   htim->Instance->CNT = 0;
+  if(tmotor->dir == 1)
+  {
+	    int16_t temp_data = tmotor->counter;
+	    temp_data = - temp_data;
+	    tmotor->velocity = (float)temp_data * (SECOND/ SAMPLING_TIME) * tmotor->ptd; // DPS
+	    tmotor->position += (float)temp_data * tmotor->ptd; // Degree
+
+  }
+  else{
+	    int16_t temp_data =  tmotor->counter;
+	    tmotor->velocity = (float)temp_data * (SECOND/ SAMPLING_TIME) * tmotor->ptd; // DPS
+	    tmotor->position += (float)temp_data * tmotor->ptd; // Degree
+  }
 }
 
 void MotorSetDuty(uint16_t nDuty, uint8_t channel)
@@ -72,9 +83,8 @@ void MotorInit(void)
   HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_1);
   HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_2);
 
-  PIDInit(&tPID_1, 2.7, 1.5, 0.2);
-  PIDInit(&tPID_2, 2.7, 1.5, 0.2);
-
+  PIDInit(&tPID_1, 0.15, 5, 0.001);
+  PIDInit(&tPID_2, 0.15, 5, 0.001);
   MotorSetDuty(0, MOTOR_1);
   MotorSetDuty(0, MOTOR_2);
 

@@ -138,6 +138,9 @@ int main(void)
 
   tProcess = NONE;
 
+
+  tMotor1.ptd = 0.121621; //2960
+  tMotor2.ptd = 0.127659; //2820
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -175,7 +178,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;
-  RCC_OscInitStruct.PLL.PLLN = 72;
+  RCC_OscInitStruct.PLL.PLLN = 75;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 4;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -233,7 +236,26 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	    	    dir1 = arrData1.dir1;
 	    	    dir2 = arrData1.dir2;
 	    	    tProcess = RUN_TEST;
-
+	    	        if (dir1 == HEAD)
+	    	        {
+	    	        	Motor1Forward();
+	    	        	tMotor1.dir = HEAD;
+	    	        }
+	    	        else
+	    	        {
+	    	        	Motor1Backward();
+	    	        	tMotor1.dir = BACK;
+	    	        }
+	    	        if (dir2 == HEAD)
+	    	        {
+	    	        	Motor2Forward();
+	    	        	tMotor2.dir = HEAD;
+	    	        }
+	    	        else
+	    	        {
+	    	        	Motor2Backward();
+	    	        	tMotor2.dir = BACK;
+	    	        }
 	    }
 	    SerialAcceptReceive();
   }
@@ -294,53 +316,7 @@ void MotorMovePos(PROFILE_t *tProfile, PID_CONTROL_t *tPIDControl1, PID_CONTROL_
   dutyCycle_global_1 = g_nDutyCycle_1;
   dutyCycle_global_2 = g_nDutyCycle_2;
 
-  if (g_nDutyCycle_1 >= 0)
-  {
-    if (dir1 == HEAD)
-    {
-    	Motor1Forward();
-    }
-    else
-    {
-    	Motor1Backward();
-    }
-  }
-  else if (g_nDutyCycle_1 < 0)
-  {
-    if (dir1 == HEAD)
-    {
-    	Motor1Backward();
-    }
-    else
-    {
-    	Motor1Forward();
-    }
-  }
 
-  if (g_nDutyCycle_2 >= 0)
-  {
-    if (dir2 == HEAD)
-    {
-    	Motor2Forward();
-    }
-    else
-    {
-    	Motor2Backward();
-    }
-  }
-  else if (g_nDutyCycle_2 < 0)
-  {
-
-    if (dir2 == HEAD)
-    {
-    	Motor2Backward();
-    }
-    else
-    {
-    	Motor2Forward();
-
-    }
-  }
   MotorSetDuty(abs(g_nDutyCycle_1), MOTOR_1);
   MotorSetDuty(abs(g_nDutyCycle_2), MOTOR_2);
   double real[6] = {tmotor1->velocity, tmotor2->velocity,  g_dCmdVel, tmotor1->position, tmotor2->position, dPosTemp};
@@ -368,6 +344,10 @@ void MotorMovePos(PROFILE_t *tProfile, PID_CONTROL_t *tPIDControl1, PID_CONTROL_
     tProcess = NONE;
     MotorSetDuty(0, MOTOR_1);
     MotorSetDuty(0, MOTOR_2);
+    tmotor1->position = 0;
+    tmotor2->position = 0;
+    tmotor1->counter = 0;
+    tmotor2->counter = 0;
     PIDReset(&tPID_2);
     PIDReset(&tPID_1);
     HAL_UART_Transmit(&huart2, (uint8_t *)statusOK, sizeof(statusOK), 1000);
@@ -392,7 +372,6 @@ void Error_Handler(void)
   }
   /* USER CODE END Error_Handler_Debug */
 }
-
 
 #ifdef  USE_FULL_ASSERT
 /**

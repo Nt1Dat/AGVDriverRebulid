@@ -12,8 +12,7 @@
 #define MOTOR_2 2
 //#define TotalPulse 7500
 //#define TotalDeg 360
-#define PPR 11880
-#define PTD 360 / 11880;
+
 
 
 #define HEAD 1
@@ -21,12 +20,15 @@
 
 typedef struct
 {
-	uint16_t counter;
+	uint32_t counter;
 	float velocity;
 	float position;
     float setPoint;
     float p_ref;
     float v_ref;
+    int8_t dir;
+    uint16_t pulsepr;
+    float ptd;
 } Motor_t;
 
 

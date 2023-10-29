@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 
-#define SAMPLING_TIME 0.005
+#define SAMPLING_TIME 0.01
 //#define THRESHOLD_ENCODER 32768
 #define MINUTE 60
 #define SECOND 1
@@ -15,6 +15,7 @@ typedef struct
     float dKp, dKi, dKd;
     float dErrorTerm;
     float dIntergral;
+    float result;
 } PID_CONTROL_t;
 
 extern PID_CONTROL_t tPID_1, tPID_2;
